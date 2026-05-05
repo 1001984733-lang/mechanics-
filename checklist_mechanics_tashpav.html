@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>צ'ק ליסט בגרות פיזיקה – מכניקה תשפ"ו</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f4f3ef;--card:#fff;--navy:#1a2744;
+  --kin:#0e7490;--kin-l:#cffafe;
+  --dyn:#1a7a4a;--dyn-l:#d1fae5;
+  --mom:#7c3aed;--mom-l:#ede9fe;
+  --ene:#b45309;--ene-l:#fff3e0;
+  --grav:#1e3a5f;--grav-l:#dbeafe;
+  --easy:#15803d;--easy-bg:#dcfce7;
+  --med:#b45309;--med-bg:#fef3c7;
+  --hard:#b91c1c;--hard-bg:#fee2e2;
+  --warn:#c2410c;--warn-bg:#fff7ed;
+  --border:#e2e0d6;--text:#1e1e2e;--muted:#6b7280;--surface:#f0ede8;
+  --shadow:0 1px 8px rgba(0,0,0,.07);
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#111217;--card:#1c1e26;--navy:#0f1523;
+  --border:#2d2f3a;--text:#e8e6f0;--muted:#8b8fa8;--surface:#252731;
+  --shadow:0 1px 8px rgba(0,0,0,.3);
+}}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;min-height:100vh;}
+
+/* ── SCREENS ── */
+.screen{display:none;}.screen.active{display:block;}
+
+/* ── NAME / LOGIN ── */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem;max-width:380px;width:100%;text-align:center;box-shadow:var(--shadow);}
+.login-logo{width:54px;height:54px;border-radius:14px;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;font-size:26px;}
+.login-card h1{font-size:20px;font-weight:700;margin-bottom:6px;}
+.login-card .sub{font-size:13px;color:var(--muted);margin-bottom:1.6rem;line-height:1.5;}
+.login-card input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-family:'Heebo',sans-serif;font-size:15px;background:var(--bg);color:var(--text);text-align:right;outline:none;margin-bottom:10px;transition:border-color .15s;}
+.login-card input:focus{border-color:var(--kin);}
+.btn-primary{width:100%;padding:11px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-family:'Heebo',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.btn-primary:hover{opacity:.88;}
+.btn-teacher{margin-top:12px;width:100%;padding:8px;background:transparent;border:1px solid var(--border);border-radius:10px;font-family:'Heebo',sans-serif;font-size:13px;color:var(--muted);cursor:pointer;transition:background .15s;}
+.btn-teacher:hover{background:var(--surface);}
+.hint{font-size:12px;color:var(--muted);margin-top:10px;}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.tb-title{font-size:14px;font-weight:700;}
+.tb-name{font-size:13px;color:var(--muted);}
+.tb-name strong{color:var(--text);font-weight:500;}
+.tb-sync{font-size:11px;transition:color .2s;}
+.tb-right{margin-right:auto;display:flex;align-items:center;gap:8px;}
+.btn-sm{font-size:12px;padding:3px 10px;border:1px solid var(--border);border-radius:7px;background:transparent;font-family:'Heebo',sans-serif;cursor:pointer;color:var(--muted);}
+.btn-sm:hover{background:var(--surface);}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:14px 20px 8px;}
+@media(max-width:700px){.stats-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:420px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:9px 12px;}
+.sl{font-size:11px;color:var(--muted);margin-bottom:2px;}
+.sv{font-size:19px;font-weight:700;color:var(--text);line-height:1;}
+.ss{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ── PROGRESS ── */
+.pw{padding:0 20px 6px;}
+.pt{height:6px;background:var(--surface);border-radius:3px;overflow:hidden;}
+.pf{height:100%;background:var(--easy);border-radius:3px;transition:width .4s;}
+.pl{font-size:11px;color:var(--muted);margin-top:3px;}
+
+/* ── RECOMMENDATIONS ── */
+.rec-panel{margin:6px 20px;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.rec-hdr{display:flex;align-items:center;gap:9px;padding:10px 15px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border);}
+.rec-hdr:hover{background:var(--surface);}
+.rec-hdr-title{font-size:13px;font-weight:600;flex:1;}
+.rec-toggle{font-size:11px;color:var(--muted);}
+.rec-body{padding:9px 10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:7px;}
+.rc{border-radius:9px;padding:9px 11px;border:1px solid var(--border);cursor:pointer;transition:box-shadow .15s;background:var(--card);}
+.rc:hover{box-shadow:var(--shadow);}
+.rc.rdone{opacity:.5;}.rc.rdone .rt{text-decoration:line-through;}
+.rpri{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.rnk{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+.rnk.hot{background:#fee2e2;color:#b91c1c;}
+.rnk.warm{background:#fff7ed;color:#c2410c;}
+.rnk.cool{background:#fef3c7;color:#b45309;}
+.rpb{flex:1;height:4px;background:var(--surface);border-radius:2px;overflow:hidden;}
+.rpf{height:100%;border-radius:2px;}
+.rpv{font-size:10px;font-weight:600;min-width:28px;text-align:left;}
+.rt{font-size:12.5px;font-weight:500;}
+.rw{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.ri{font-size:10.5px;color:var(--muted);margin-top:4px;}
+.ri a{color:var(--kin);text-decoration:none;}.ri a:hover{text-decoration:underline;}
+
+/* ── FILTERS ── */
+.filter-bar{display:flex;gap:5px;padding:8px 20px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border);background:var(--card);}
+.fl{font-size:12px;color:var(--muted);font-weight:500;}
+.fb{padding:3px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;font-family:'Heebo',sans-serif;font-size:12px;cursor:pointer;color:var(--muted);transition:all .1s;font-weight:500;}
+.fb:hover{border-color:var(--text);color:var(--text);}
+.fb.act{background:var(--navy);color:#fff;border-color:var(--navy);}
+.fb.fe{border-color:var(--easy);color:var(--easy);}.fb.fe.act{background:var(--easy);color:#fff;border-color:var(--easy);}
+.fb.fm{border-color:var(--med);color:var(--med);}.fb.fm.act{background:var(--med);color:#fff;}
+.fb.fh{border-color:var(--hard);color:var(--hard);}.fb.fh.act{background:var(--hard);color:#fff;}
+.fb.ft{border-color:var(--kin);color:var(--kin);}.fb.ft.act{background:var(--kin);color:#fff;}
+.fdv{width:1px;height:16px;background:var(--border);}
+
+/* ── SECTIONS ── */
+.sec{padding:14px 20px 0;}
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1.5px solid var(--border);}
+.sdot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+.stitle{font-size:16px;font-weight:700;}
+.scnt{font-size:12px;color:var(--muted);margin-right:auto;}
+.spbw{height:4px;background:var(--surface);border-radius:2px;overflow:hidden;width:65px;}
+.spbf{height:100%;border-radius:2px;transition:width .4s;}
+.dg{margin-bottom:16px;}
+.dgl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px;}
+.dgl.e{color:var(--easy);}.dgl.m{color:var(--med);}.dgl.h{color:var(--hard);}
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:8px;}
+
+/* ── QUESTION CARD ── */
+.qc{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:11px 13px;position:relative;cursor:pointer;transition:border-color .15s,box-shadow .15s;user-select:none;}
+.qc:hover{border-color:var(--muted);box-shadow:var(--shadow);}
+.qc.done{background:var(--surface);opacity:.65;}.qc.done .topic{text-decoration:line-through;color:var(--muted);}
+.stripe-ok{position:absolute;right:0;top:0;bottom:0;width:3.5px;background:var(--easy);border-radius:0 11px 11px 0;}
+.stripe-pt{position:absolute;right:0;top:0;bottom:0;width:3.5px;background:var(--warn);border-radius:0 11px 11px 0;}
+.ctop{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.yr{font-size:16px;font-weight:700;color:var(--text);line-height:1;}
+.qn{font-size:11px;color:var(--muted);}
+.ddot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.cacts{display:flex;align-items:center;gap:5px;margin-right:auto;}
+.olink{font-size:10px;padding:2px 7px;border:1px solid var(--border);border-radius:6px;color:var(--muted);text-decoration:none;display:inline-block;line-height:1.7;transition:all .12s;white-space:nowrap;}
+.olink:hover{background:var(--surface);color:var(--text);}
+.ckbox{width:17px;height:17px;border-radius:4px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .12s;background:var(--card);}
+.ckbox.on{background:var(--easy);border-color:var(--easy);}
+.ckbox svg{display:none;}.ckbox.on svg{display:block;}
+.topic{font-size:12.5px;font-weight:500;color:var(--text);}
+.note{margin-top:4px;font-size:11px;color:var(--warn);background:var(--warn-bg);border-radius:5px;padding:3px 7px;line-height:1.4;}
+.qc.hidden,.dg.hidden,.sec.hidden{display:none;}
+.empty-msg{padding:36px 20px;text-align:center;color:var(--muted);font-size:14px;}
+
+/* ── TEACHER ── */
+.teacher-wrap{min-height:100vh;background:var(--bg);}
+.teacher-hdr{background:var(--navy);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:12px;}
+.teacher-hdr h2{font-size:16px;font-weight:700;}
+.teacher-hdr .ts{font-size:13px;color:rgba(255,255,255,.6);}
+.btn-back{margin-right:auto;padding:5px 14px;background:rgba(255,255,255,.15);border:none;border-radius:8px;color:white;font-family:'Heebo',sans-serif;cursor:pointer;font-size:13px;}
+.teacher-body{padding:20px 24px;}
+.teacher-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:20px;}
+.tscard{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:12px 14px;}
+.tsl{font-size:11px;color:var(--muted);margin-bottom:3px;}
+.tsv{font-size:24px;font-weight:700;}
+.teacher-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+.teacher-table-wrap table{width:100%;border-collapse:collapse;}
+.teacher-table-wrap th{padding:10px 14px;text-align:right;font-weight:500;background:var(--navy);color:#fff;font-size:13px;}
+.teacher-table-wrap td{padding:9px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+.teacher-table-wrap tr:last-child td{border-bottom:none;}
+.teacher-table-wrap tr:hover td{background:var(--surface);}
+.mini-bar-wrap{display:flex;align-items:center;gap:7px;}
+.mini-bar{flex:1;height:5px;background:var(--surface);border-radius:3px;overflow:hidden;}
+.mini-fill{height:100%;border-radius:3px;}
+.topic-pills{display:flex;gap:4px;flex-wrap:wrap;}
+.tpill{font-size:10px;padding:1px 6px;border-radius:4px;font-weight:500;}
+.search-bar{display:flex;gap:10px;margin-bottom:14px;align-items:center;}
+.search-bar input{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:9px;font-family:'Heebo',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;}
+.search-bar input:focus{border-color:var(--kin);}
+@media(max-width:700px){.teacher-body{padding:16px;}.teacher-table-wrap{overflow-x:auto;}}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">⚙️</div>
+      <h1>צ'ק ליסט בגרות פיזיקה</h1>
+      <div class="sub">מכניקה – מיקוד תשפ"ו ("שאגת הארי")<br>כל שאלה מקושרת ישירות לשאלון המקורי</div>
+      <input type="text" id="name-input" placeholder="שם פרטי ושם משפחה" autocomplete="off" />
+      <button class="btn-primary" onclick="startStudent()">התחל ←</button>
+      <div class="hint" id="login-hint" style="color:var(--warn);min-height:16px;"></div>
+      <button class="btn-teacher" onclick="openTeacher()">👨‍🏫 כניסת מורה</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ STUDENT MAIN ══════════ -->
+<div id="screen-main" class="screen">
+  <div class="topbar">
+    <div class="tb-title">📐 בגרות מכניקה תשפ"ו</div>
+    <div class="tb-name">שלום, <strong id="disp-name"></strong></div>
+    <span id="sync-badge" class="tb-sync" style="font-size:11px;color:var(--muted)"></span>
+    <div class="tb-right">
+      <button class="btn-sm" onclick="changeName()">החלף שם</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="sc"><div class="sl">סה"כ</div><div class="sv" id="s0">0</div><div class="ss" id="s0b"></div></div>
+    <div class="sc"><div class="sl">🔵 קינמטיקה</div><div class="sv" id="s1">0%</div><div class="ss" id="s1b"></div></div>
+    <div class="sc"><div class="sl">🟢 דינמיקה</div><div class="sv" id="s2">0%</div><div class="ss" id="s2b"></div></div>
+    <div class="sc"><div class="sl">🟣 תנע</div><div class="sv" id="s3">0%</div><div class="ss" id="s3b"></div></div>
+    <div class="sc"><div class="sl">🟠 אנרגיה</div><div class="sv" id="s4">0%</div><div class="ss" id="s4b"></div></div>
+    <div class="sc"><div class="sl">🌍 כבידה</div><div class="sv" id="s5">0%</div><div class="ss" id="s5b"></div></div>
+  </div>
+
+  <div class="pw"><div class="pt"><div class="pf" id="prog-fill" style="width:0%"></div></div>
+    <div class="pl" id="prog-lbl"></div></div>
+
+  <!-- RECOMMENDATIONS -->
+  <div class="rec-panel" id="rec-panel">
+    <div class="rec-hdr" onclick="toggleRec()">
+      <span style="font-size:16px">🎯</span>
+      <span class="rec-hdr-title">המלצות תרגול – לפי תחזית תשפ"ו</span>
+      <span class="rec-toggle" id="rec-lbl">הסתר ▲</span>
+    </div>
+    <div id="rec-body" class="rec-body"></div>
+  </div>
+
+  <div class="filter-bar">
+    <span class="fl">סינון:</span>
+    <button class="fb act" onclick="setF('all',this)">הכל</button>
+    <div class="fdv"></div>
+    <button class="fb" onclick="setF('kin',this)">🔵 קינמטיקה</button>
+    <button class="fb" onclick="setF('dyn',this)">🟢 דינמיקה</button>
+    <button class="fb" onclick="setF('mom',this)">🟣 תנע</button>
+    <button class="fb" onclick="setF('ene',this)">🟠 אנרגיה</button>
+    <button class="fb" onclick="setF('grav',this)">🌍 כבידה</button>
+    <div class="fdv"></div>
+    <button class="fb fe" onclick="setF('easy',this)">⭐ קל</button>
+    <button class="fb fm" onclick="setF('med',this)">⭐⭐</button>
+    <button class="fb fh" onclick="setF('hard',this)">⭐⭐⭐</button>
+    <div class="fdv"></div>
+    <button class="fb ft" onclick="setF('todo',this)">לא הושלם</button>
+  </div>
+
+  <div id="sections-area"></div>
+  <div style="height:40px;"></div>
+</div>
+
+<!-- ══════════ TEACHER ══════════ -->
+<div id="screen-teacher" class="screen">
+  <div class="teacher-wrap">
+    <div class="teacher-hdr">
+      <h2>👨‍🏫 לוח מורה — מכניקה תשפ"ו</h2>
+      <span class="ts" id="teacher-status">טוען...</span>
+      <button class="btn-back" onclick="showScreen('login')">← חזרה</button>
+    </div>
+    <div class="teacher-body">
+      <div class="teacher-summary">
+        <div class="tscard"><div class="tsl">תלמידים רשומים</div><div class="tsv" id="t-count">—</div></div>
+        <div class="tscard"><div class="tsl">ממוצע השלמה</div><div class="tsv" id="t-avg">—</div></div>
+        <div class="tscard"><div class="tsl">מעל 80%</div><div class="tsv" id="t-hi">—</div></div>
+        <div class="tscard"><div class="tsl">מתחת ל-20%</div><div class="tsv" id="t-lo">—</div></div>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="teacher-search" placeholder="חיפוש תלמיד..." oninput="filterTeacher()" />
+        <button class="btn-sm" onclick="refreshTeacher()">🔄 רענן</button>
+      </div>
+      <div class="teacher-table-wrap" id="teacher-table"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  CONFIG — הדבק את ה-Web App URL כאן
+// ══════════════════════════════════════════════════════
+const SCRIPT_URL    = 'https://script.google.com/macros/s/AKfycbw1BX33-8s__ByDtjU-Gu5j4D4Jo6A4k1C71HxOzxtoxmMtYC44VBDaxMVuUAfLiYcU/exec';
+const TEACHER_PASS  = '1928טםד';   // ← תואם לקוד Apps Script
+const STORAGE_KEY   = 'mech_cl_';     // + שם תלמיד
+const TOTAL_QS_KEY  = 'mech_total';
+
+// ══════════════════════════════════════════════════════
+//  DATA — נושאים
+// ══════════════════════════════════════════════════════
+const SUBS = {
+  kin:  {label:'קינמטיקה',           color:'var(--kin)',  emoji:'🔵'},
+  dyn:  {label:'דינמיקה',            color:'var(--dyn)',  emoji:'🟢'},
+  mom:  {label:'תנע ושימורו',        color:'var(--mom)',  emoji:'🟣'},
+  ene:  {label:'אנרגיה מכנית',       color:'var(--ene)',  emoji:'🟠'},
+  grav: {label:'כבידה',              color:'var(--grav)', emoji:'🌍'},
+};
+const DL  = {easy:'קל ⭐', med:'בינוני ⭐⭐', hard:'קשה ⭐⭐⭐'};
+const DC  = {easy:'var(--easy)', med:'var(--med)', hard:'var(--hard)'};
+
+function examUrl(y) {
+  if (y >= 2009) return `https://meyda.education.gov.il/sheeloney_bagrut/${y}/6/HEB/036361.PDF`;
+  return 'https://meyda.education.gov.il/bagmgr/default.html#/';
+}
+
+// ── ALL QUESTIONS ──────────────────────────────────────
+const QS = [
+  // ── קינמטיקה ──
+  {id:'k-2025-1',s:'kin',y:2025,q:1,d:'med', ok:true, t:'זריקת כידון — שני צירים, זווית פגיעה'},
+  {id:'k-2024-1',s:'kin',y:2024,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2023-1',s:'kin',y:2023,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2021-1',s:'kin',y:2021,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2020-1',s:'kin',y:2020,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2019-1',s:'kin',y:2019,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2018-1',s:'kin',y:2018,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2016-1',s:'kin',y:2016,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2015-1',s:'kin',y:2015,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2013-1',s:'kin',y:2013,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2012-1',s:'kin',y:2012,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2011-1',s:'kin',y:2011,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2009-1',s:'kin',y:2009,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2008-1',s:'kin',y:2008,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2006-1',s:'kin',y:2006,q:1,d:'easy',ok:true, t:'קינמטיקה (ללא סעיף ג׳)'},
+  {id:'k-2005-1',s:'kin',y:2005,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2003-1',s:'kin',y:2003,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2002-1',s:'kin',y:2002,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2001-1',s:'kin',y:2001,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-2000-1',s:'kin',y:2000,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-1999-1',s:'kin',y:1999,q:1,d:'med', ok:true, t:'קינמטיקה'},
+  {id:'k-1996-1',s:'kin',y:1996,q:1,d:'easy',ok:true, t:'קינמטיקה'},
+  {id:'k-1995-1',s:'kin',y:1995,q:1,d:'easy',ok:true, t:'קינמטיקה'},
+  {id:'k-1994-1',s:'kin',y:1994,q:1,d:'easy',ok:true, t:'קינמטיקה'},
+  {id:'k-2022-1',s:'kin',y:2022,q:1,d:'easy',ok:false,t:'קינמטיקה (סעיף א׳ בלבד תקף)',n:'⚠ שאר הסעיפים = תאוצה משתנה — ירד'},
+
+  // ── דינמיקה ──
+  {id:'d-2025-2',s:'dyn',y:2025,q:2,d:'med', ok:false,t:'מישור משופע + חיכוך — חלקי',n:'⚠ סעיפים א׳–ג׳ (חיכוך סטטי) ירדו — תרגל ד׳–ה׳'},
+  {id:'d-2024-2',s:'dyn',y:2024,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2023-2',s:'dyn',y:2023,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2022-2',s:'dyn',y:2022,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2021-2',s:'dyn',y:2021,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2019-2',s:'dyn',y:2019,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2017-2',s:'dyn',y:2017,q:2,d:'med', ok:false,t:'דינמיקה — חלקי',n:'⚠ סעיף א׳ + חלק מב׳ (חיכוך סטטי) ירדו'},
+  {id:'d-2016-2',s:'dyn',y:2016,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2014-2',s:'dyn',y:2014,q:2,d:'med', ok:false,t:'דינמיקה — חלקי',n:'⚠ סעיף ה׳ (מהירות טרמינלית) ירד'},
+  {id:'d-2012-2',s:'dyn',y:2012,q:2,d:'med', ok:false,t:'דינמיקה — חלקי',n:'⚠ סעיפים א׳–ב׳ (מצב התמדה + חיכוך סטטי) ירדו'},
+  {id:'d-2010-2',s:'dyn',y:2010,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2009-2',s:'dyn',y:2009,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2007-2',s:'dyn',y:2007,q:2,d:'med', ok:false,t:'דינמיקה — חלקי',n:'⚠ סעיפים ד׳–ה׳ ירדו'},
+  {id:'d-2005-2',s:'dyn',y:2005,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2004-2',s:'dyn',y:2004,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2003-2',s:'dyn',y:2003,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2002-2',s:'dyn',y:2002,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2001-2',s:'dyn',y:2001,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-2000-2',s:'dyn',y:2000,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-1999-2',s:'dyn',y:1999,q:2,d:'med', ok:true, t:'דינמיקה'},
+  {id:'d-1996-2',s:'dyn',y:1996,q:2,d:'easy',ok:true, t:'דינמיקה'},
+  {id:'d-1995-2',s:'dyn',y:1995,q:2,d:'easy',ok:true, t:'דינמיקה'},
+
+  // ── תנועה מעגלית / במישור (נכלל בנושא דינמיקה מורחב) ──
+  {id:'d-2025-3',s:'dyn',y:2025,q:3,d:'med', ok:true, t:'תנועה מעגלית אופקית — חוטים + תדירות'},
+  {id:'d-2024-3',s:'dyn',y:2024,q:3,d:'med', ok:true, t:'תנועה מעגלית'},
+  {id:'d-2023-3',s:'dyn',y:2023,q:3,d:'med', ok:true, t:'תנועה מעגלית'},
+  {id:'d-2021-3',s:'dyn',y:2021,q:3,d:'med', ok:true, t:'תנועה מעגלית'},
+  {id:'d-2020-3',s:'dyn',y:2020,q:3,d:'med', ok:true, t:'תנועה מעגלית'},
+  {id:'d-2019-3',s:'dyn',y:2019,q:3,d:'med', ok:true, t:'תנועה מעגלית'},
+  {id:'d-2018-3',s:'dyn',y:2018,q:3,d:'med', ok:true, t:'תנועה מעגלית'},
+  {id:'d-2017-3',s:'dyn',y:2017,q:3,d:'med', ok:true, t:'תנועה מעגלית'},
+  {id:'d-2015-3',s:'dyn',y:2015,q:3,d:'easy',ok:true, t:'תנועה מעגלית'},
+  {id:'d-2014-3',s:'dyn',y:2014,q:3,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-2013-3',s:'dyn',y:2013,q:3,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-2011-3',s:'dyn',y:2011,q:3,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-2010-3',s:'dyn',y:2010,q:3,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-2009-3',s:'dyn',y:2009,q:3,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-2007-3',s:'dyn',y:2007,q:3,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-2004-3',s:'dyn',y:2004,q:3,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-2002-3',s:'dyn',y:2002,q:3,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-2001-3',s:'dyn',y:2001,q:3,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-1997-3',s:'dyn',y:1997,q:3,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-1995-3',s:'dyn',y:1995,q:3,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-1994-2',s:'dyn',y:1994,q:2,d:'med', ok:true, t:'תנועה במישור'},
+  {id:'d-2022-3',s:'dyn',y:2022,q:3,d:'med', ok:false,t:'תנועה מעגלית — חלקי',n:'⚠ סעיפים ג׳,ד׳,ו׳ (חיכוך סטטי) ירדו'},
+  {id:'d-2012-5',s:'dyn',y:2012,q:5,d:'hard',ok:false,t:'תנועה מעגלית — חלקי',n:'⚠ חיכוך סטטי ירד'},
+
+  // ── התנע ושימורו ──
+  {id:'m-2025-4',s:'mom',y:2025,q:4,d:'med', ok:true, t:'קפיץ + שימור תנע + התנגשות אלסטית'},
+  {id:'m-2024-4',s:'mom',y:2024,q:4,d:'med', ok:false,t:'התנע — חלקי',n:'⚠ סעיפים ג׳–ה׳ (מתקף) ירדו'},
+  {id:'m-2022-5',s:'mom',y:2022,q:5,d:'med', ok:false,t:'התנע — חלקי',n:'⚠ סעיפים ג׳,ו׳ (מתקף + דו-ממדי) ירדו'},
+  {id:'m-2021-5',s:'mom',y:2021,q:5,d:'med', ok:false,t:'התנע — חלקי (= בגרות 2012 שאלה 4)',n:'⚠ סעיפים א׳–ב׳ (מתקף) ירדו'},
+  {id:'m-2017-3',s:'mom',y:2017,q:3,d:'med', ok:false,t:'שימור תנע + אנרגיה — חלקי',n:'⚠ סעיף ה׳ (מד תאוצה) ירד'},
+  {id:'m-2016-4',s:'mom',y:2016,q:4,d:'med', ok:false,t:'התנע — חלקי',n:'⚠ סעיף ג׳ (כוח ממוצע) ירד'},
+  {id:'m-2012-4',s:'mom',y:2012,q:4,d:'med', ok:false,t:'התנע — חלקי',n:'⚠ סעיפים א׳–ב׳ (מתקף) ירדו'},
+  {id:'m-2011-3',s:'mom',y:2011,q:3,d:'med', ok:false,t:'התנע — חלקי',n:'⚠ סעיפים ב׳(2)–ג׳ (מתקף) ירדו'},
+  {id:'m-2010-3',s:'mom',y:2010,q:3,d:'med', ok:false,t:'התנע — חלקי',n:'⚠ סעיף ד׳ (שטח גרף) ירד'},
+  {id:'m-2006-3',s:'mom',y:2006,q:3,d:'med', ok:true, t:'שימור תנע'},
+  {id:'m-2004-4',s:'mom',y:2004,q:4,d:'med', ok:true, t:'שימור תנע'},
+  {id:'m-2002-4',s:'mom',y:2002,q:4,d:'med', ok:false,t:'זריקות + שימור תנע — חלקי',n:'⚠ סעיף א׳ (קפיץ) ירד'},
+  {id:'m-1995-4',s:'mom',y:1995,q:4,d:'med', ok:false,t:'התנע — חלקי',n:'⚠ סעיף ה׳ (מתקף) ירד'},
+  {id:'m-1994-3',s:'mom',y:1994,q:3,d:'med', ok:false,t:'התנע — חלקי',n:'⚠ סעיף ג׳(2) (קפיץ) ירד'},
+
+  // ── אנרגיה מכנית ──
+  {id:'e-2024-3',s:'ene',y:2024,q:3,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2023-5',s:'ene',y:2023,q:5,d:'med', ok:false,t:'אנרגיה + תנע — חלקי',n:'⚠ סעיפים ד׳–ה׳ (מתקף) ירדו'},
+  {id:'e-2023-4',s:'ene',y:2023,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2022-4',s:'ene',y:2022,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2021-4',s:'ene',y:2021,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2019-4',s:'ene',y:2019,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2018-4',s:'ene',y:2018,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2017-4',s:'ene',y:2017,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2016-3',s:'ene',y:2016,q:3,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2015-4',s:'ene',y:2015,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2014-4',s:'ene',y:2014,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2013-4',s:'ene',y:2013,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2012-3',s:'ene',y:2012,q:3,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2009-4',s:'ene',y:2009,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2007-4',s:'ene',y:2007,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2006-4',s:'ene',y:2006,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2005-4',s:'ene',y:2005,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2003-3',s:'ene',y:2003,q:3,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2002-3',s:'ene',y:2002,q:3,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2001-4',s:'ene',y:2001,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2000-3',s:'ene',y:2000,q:3,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-1999-4',s:'ene',y:1999,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-1997-4',s:'ene',y:1997,q:4,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-1996-3',s:'ene',y:1996,q:3,d:'med', ok:true, t:'אנרגיה מכנית'},
+  {id:'e-2010-4',s:'ene',y:2010,q:4,d:'med', ok:false,t:'אנרגיה מכנית — חלקי',n:'⚠ רוב השאלה (קפיצים + אנרגיה אלסטית) ירדה — פרט לסעיף ב׳'},
+
+  // ── כבידה ──
+  {id:'g-2025-6',s:'grav',y:2025,q:6,d:'hard',ok:true, t:'לוויין במסלול אליפטי + עבודת כבידה + מסלול מעגלי'},
+  {id:'g-2024-5',s:'grav',y:2024,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2023-6',s:'grav',y:2023,q:6,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2022-6',s:'grav',y:2022,q:6,d:'hard',ok:false,t:'כבידה — חלקי',n:'⚠ סעיף ה׳ (מצב התמדה) ירד'},
+  {id:'g-2021-6',s:'grav',y:2021,q:6,d:'hard',ok:false,t:'כבידה — חלקי',n:'⚠ סעיף ב׳ (מצב התמדה) ירד'},
+  {id:'g-2020-5',s:'grav',y:2020,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2019-5',s:'grav',y:2019,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2018-5',s:'grav',y:2018,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2017-5',s:'grav',y:2017,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2016-5',s:'grav',y:2016,q:5,d:'hard',ok:false,t:'כבידה — חלקי',n:'⚠ סעיף א׳ (מצב התמדה) ירד'},
+  {id:'g-2015-5',s:'grav',y:2015,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2014-6',s:'grav',y:2014,q:6,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2013-5',s:'grav',y:2013,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2012-6',s:'grav',y:2012,q:6,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2011-5',s:'grav',y:2011,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2010-5',s:'grav',y:2010,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2009-5',s:'grav',y:2009,q:5,d:'hard',ok:false,t:'כבידה — חלקי',n:'⚠ סעיף א׳ (מצב התמדה) ירד'},
+  {id:'g-2008-3',s:'grav',y:2008,q:3,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2006-5',s:'grav',y:2006,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2004-5',s:'grav',y:2004,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-2003-4',s:'grav',y:2003,q:4,d:'med', ok:true, t:'כבידה'},
+  {id:'g-1999-5',s:'grav',y:1999,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-1997-5',s:'grav',y:1997,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-1996-5',s:'grav',y:1996,q:5,d:'hard',ok:false,t:'כבידה — חלקי',n:'⚠ סעיף ד׳(2) (תנועת מעלית) ירד'},
+  {id:'g-1995-5',s:'grav',y:1995,q:5,d:'hard',ok:true, t:'כבידה'},
+  {id:'g-1994-5',s:'grav',y:1994,q:5,d:'hard',ok:true, t:'כבידה'},
+];
+const TOTAL = QS.length;
+
+// ── RECOMMENDATIONS ────────────────────────────────────
+const RECS = [
+  {rank:1,cls:'hot',  prob:95,color:'#b91c1c',
+   topic:'כבידה ולוויינים',
+   why:'הופיעה בכל 30 השנים האחרונות ללא יוצא מן הכלל. הנושא הכי בטוח בבחינה.',
+   ids:['g-2025-6','g-2024-5','g-2023-6']},
+  {rank:2,cls:'hot',  prob:90,color:'#b91c1c',
+   topic:'זריקה אופקית / תנועה בשני צירים',
+   why:'הופיעה ב-2025. חוזרת כמעט כל שנה — ליבה של קינמטיקה.',
+   ids:['k-2025-1','k-2023-1','k-2021-1']},
+  {rank:3,cls:'hot',  prob:88,color:'#b91c1c',
+   topic:'תנועה מעגלית (מישור אופקי)',
+   why:'הופיעה ב-2025 עם חוטים. נושא שחוזר ברציפות.',
+   ids:['d-2025-3','d-2024-3','d-2023-3']},
+  {rank:4,cls:'hot',  prob:85,color:'#c2410c',
+   topic:'שימור תנע + התנגשות אלסטית/פלסטית',
+   why:'הופיע ב-2025. נושא ליבה שחוזר כל שנה.',
+   ids:['m-2025-4','m-2006-3','m-2004-4']},
+  {rank:5,cls:'hot',  prob:82,color:'#c2410c',
+   topic:'אנרגיה מכנית (ללא קפיצים)',
+   why:'הופיעה ב-2024. תמיד בבחינה — שימור אנרגיה + גובה + מהירות.',
+   ids:['e-2024-3','e-2023-4','e-2022-4']},
+  {rank:6,cls:'warm', prob:78,color:'#b45309',
+   topic:'דינמיקה — מישור משופע + חיכוך קינטי',
+   why:'חיכוך סטטי ירד, קינטי נשאר. לא הופיע כשאלה נקייה מ-2021.',
+   ids:['d-2025-2','d-2021-2','d-2019-2']},
+  {rank:7,cls:'warm', prob:72,color:'#b45309',
+   topic:'כבידה — מסלול אליפטי + שימור אנרגיה',
+   why:'הופיע ב-2025. שאלת כבידה עמוקה עם שימור.',
+   ids:['g-2025-6','g-2022-6','g-2019-5']},
+  {rank:8,cls:'warm', prob:65,color:'#b45309',
+   topic:'תנועה מעגלית במישור אנכי',
+   why:'לא הופיעה מ-2019 — 6 שנות היעדרות.',
+   ids:['d-2019-3','d-2018-3','d-2017-3']},
+  {rank:9,cls:'cool', prob:60,color:'#888',
+   topic:'כבידה — לוויין + עבודה + מחזור',
+   why:'שאלת כבידה עם שאלות תיאורטיות על זמן מחזור ועבודה.',
+   ids:['g-2025-6','g-2024-5','g-2015-5']},
+  {rank:10,cls:'cool', prob:55,color:'#888',
+   topic:'שימור תנע עם קפיץ כמנגנון',
+   why:'ב-2025 הופיע קפיץ כמנגנון התנתקות (לא אנרגיה אלסטית — ירדה). נושא מועמד.',
+   ids:['m-2025-4','m-2006-3','m-2004-4']},
+];
+
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+let done = {};            // { id: true }
+let studentName = '';
+let activeFilter = 'all';
+let recOpen = true;
+let saveTimer = null;
+let allStudents = [];
+
+// ── local helpers ─────────────────────────────────────
+function lsKey(n) { return STORAGE_KEY + n; }
+function saveLocal() {
+  try { localStorage.setItem(lsKey(studentName), JSON.stringify(done)); } catch(e) {}
+}
+function loadLocal(n) {
+  try { const r = localStorage.getItem(lsKey(n)); return r ? JSON.parse(r) : null; } catch(e) { return null; }
+}
+
+// ── sync status ───────────────────────────────────────
+function setSyncBadge(state) {
+  const el = document.getElementById('sync-badge');
+  if (!el) return;
+  const map = {
+    loading: ['⏳ טוען...', 'var(--muted)'],
+    saving:  ['🔄 שומר...', 'var(--med)'],
+    synced:  ['☁️ מסונכרן', 'var(--easy)'],
+    offline: ['📵 שמור מקומי', 'var(--warn)'],
+  };
+  const [txt, clr] = map[state] || map.offline;
+  el.textContent = txt; el.style.color = clr;
+}
+
+// ── sheets ────────────────────────────────────────────
+async function loadFromSheets(name) {
+  setSyncBadge('loading');
+  try {
+    const r = await fetch(`${SCRIPT_URL}?action=load&name=${encodeURIComponent(name)}`);
+    const d = await r.json();
+    if (d.status === 'ok' || d.status === 'new') {
+      done = d.done || {};
+      saveLocal();
+      setSyncBadge('synced');
+      return;
+    }
+  } catch(e) {
+    const local = loadLocal(name);
+    if (local) done = local;
+    setSyncBadge('offline');
+  }
+}
+
+async function saveToSheets() {
+  setSyncBadge('saving'); saveLocal();
+  const topics = {};
+  ['kin','dyn','mom','ene','grav'].forEach(s => {
+    const sq = QS.filter(q => q.s === s);
+    topics[s] = {d: sq.filter(q => done[q.id]).length, t: sq.length};
+  });
+  try {
+    await fetch(SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify({name:studentName, done, topics, total:TOTAL})
+    });
+    setSyncBadge('synced');
+  } catch(e) { setSyncBadge('offline'); }
+}
+
+function scheduleSave() {
+  saveLocal();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToSheets, 1500);
+}
+
+// ══════════════════════════════════════════════════════
+//  SCREENS
+// ══════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+async function startStudent() {
+  const name = document.getElementById('name-input').value.trim();
+  const hint = document.getElementById('login-hint');
+  if (!name) { hint.textContent = 'אנא הכנס שם'; return; }
+  hint.textContent = '';
+  studentName = name;
+  document.getElementById('disp-name').textContent = name;
+  const local = loadLocal(name);
+  if (local) done = local;
+  showScreen('main');
+  renderSections(); updateStats();
+  await loadFromSheets(name);
+  renderSections(); updateStats();
+}
+
+function changeName() {
+  showScreen('login');
+  document.getElementById('name-input').value = '';
+}
+
+async function openTeacher() {
+  const pass = prompt('סיסמת מורה:');
+  if (!pass) return;
+  if (pass !== TEACHER_PASS) { alert('סיסמה שגויה'); return; }
+  showScreen('teacher');
+  document.getElementById('teacher-status').textContent = 'טוען נתונים...';
+  await refreshTeacher();
+}
+
+async function refreshTeacher() {
+  try {
+    const r = await fetch(`${SCRIPT_URL}?action=teacher&pass=${encodeURIComponent(TEACHER_PASS)}`);
+    const d = await r.json();
+    if (d.status === 'ok') {
+      allStudents = d.students || [];
+      document.getElementById('teacher-status').textContent = `${allStudents.length} תלמידים`;
+      renderTeacher(allStudents);
+    } else {
+      document.getElementById('teacher-status').textContent = 'שגיאה';
+    }
+  } catch(e) {
+    document.getElementById('teacher-status').textContent = 'שגיאת חיבור';
+  }
+}
+
+function filterTeacher() {
+  const q = document.getElementById('teacher-search').value.trim().toLowerCase();
+  renderTeacher(q ? allStudents.filter(s => s.name.toLowerCase().includes(q)) : allStudents);
+}
+
+function renderTeacher(students) {
+  // summary cards
+  const count = students.length;
+  const avgs  = students.map(s => parseInt(s.pct) || 0);
+  const avg   = count ? Math.round(avgs.reduce((a,b)=>a+b,0)/count) : 0;
+  document.getElementById('t-count').textContent = count;
+  document.getElementById('t-avg').textContent   = avg + '%';
+  document.getElementById('t-hi').textContent    = avgs.filter(p=>p>=80).length;
+  document.getElementById('t-lo').textContent    = avgs.filter(p=>p<20).length;
+
+  const el = document.getElementById('teacher-table');
+  if (!students.length) {
+    el.innerHTML = '<div style="padding:28px;text-align:center;color:var(--muted)">אין תלמידים עדיין</div>';
+    return;
+  }
+  const topicHeaders = ['קינמטיקה','דינמיקה','תנע','אנרגיה','כבידה'];
+  const topicKeys    = ['kin','dyn','mom','ene','grav'];
+  const topicColors  = ['var(--kin)','var(--dyn)','var(--mom)','var(--ene)','var(--grav)'];
+
+  const rows = students.map((s, i) => {
+    const pct = parseInt(s.pct) || 0;
+    const barClr = pct>=80?'var(--easy)':pct>=50?'var(--med)':pct>=20?'var(--warn)':'var(--hard)';
+    const tpills = topicKeys.map((k,ki) => {
+      const v = s.byTopic ? (s.byTopic[k]||'—') : '—';
+      return `<span class="tpill" style="background:${topicColors[ki]}22;color:${topicColors[ki]}">${topicHeaders[ki].slice(0,3)}: ${v}</span>`;
+    }).join('');
+    return `<tr>
+      <td style="font-weight:500">${i+1}. ${s.name}</td>
+      <td style="text-align:center">${s.done}/${s.total}</td>
+      <td style="min-width:120px">
+        <div class="mini-bar-wrap">
+          <div class="mini-bar"><div class="mini-fill" style="width:${pct}%;background:${barClr}"></div></div>
+          <span style="font-size:12px;font-weight:600;color:${barClr};min-width:34px">${pct}%</span>
+        </div>
+      </td>
+      <td><div class="topic-pills">${tpills}</div></td>
+      <td style="font-size:11px;color:var(--muted)">${s.updated||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `<table>
+    <thead><tr>
+      <th>תלמיד</th><th>שאלות</th><th>התקדמות</th><th>לפי נושא</th><th>עדכון אחרון</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ══════════════════════════════════════════════════════
+//  TOGGLE
+// ══════════════════════════════════════════════════════
+function toggleDone(id, e) {
+  e.stopPropagation();
+  done[id] = !done[id];
+  if (!done[id]) delete done[id];
+  const card = document.getElementById('card-' + id);
+  if (card) {
+    card.classList.toggle('done', !!done[id]);
+    const cb = card.querySelector('.ckbox');
+    if (cb) cb.classList.toggle('on', !!done[id]);
+  }
+  updateStats(); scheduleSave();
+}
+
+// ══════════════════════════════════════════════════════
+//  FILTER
+// ══════════════════════════════════════════════════════
+function setF(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.fb').forEach(b => b.classList.remove('act'));
+  btn.classList.add('act');
+  renderSections(); updateStats();
+}
+
+function getFilt() {
+  return QS.filter(q => {
+    if (activeFilter === 'easy') return q.d === 'easy';
+    if (activeFilter === 'med')  return q.d === 'med';
+    if (activeFilter === 'hard') return q.d === 'hard';
+    if (activeFilter === 'todo') return !done[q.id];
+    if (['kin','dyn','mom','ene','grav'].includes(activeFilter)) return q.s === activeFilter;
+    return true;
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════════════
+function renderSections() {
+  const fqs  = getFilt();
+  const subs = [...new Set(fqs.map(q => q.s))];
+  const area = document.getElementById('sections-area');
+  if (!subs.length) { area.innerHTML = '<div class="empty-msg">אין שאלות התואמות לסינון</div>'; return; }
+
+  area.innerHTML = subs.map(sub => {
+    const sq  = fqs.filter(q => q.s === sub);
+    const dn  = sq.filter(q => done[q.id]).length;
+    const pct = sq.length ? Math.round(100*dn/sq.length) : 0;
+    const si  = SUBS[sub];
+    const byD = {easy:[], med:[], hard:[]};
+    sq.forEach(q => byD[q.d].push(q));
+    Object.keys(byD).forEach(d => byD[d].sort((a,b) => b.y - a.y));
+
+    const groups = Object.entries(byD)
+      .filter(([d, qs]) => qs.length)
+      .map(([d, qs]) => `
+        <div class="dg">
+          <div class="dgl ${d}">${DL[d]}</div>
+          <div class="cg">${qs.map(cardHTML).join('')}</div>
+        </div>`).join('');
+
+    return `<div class="sec">
+      <div class="sh">
+        <div class="sdot" style="background:${si.color}"></div>
+        <div class="stitle" style="color:${si.color}">${si.emoji} ${si.label}</div>
+        <span class="scnt">${dn}/${sq.length}</span>
+        <div class="spbw"><div class="spbf" style="width:${pct}%;background:${si.color}"></div></div>
+      </div>
+      ${groups}
+    </div>`;
+  }).join('');
+}
+
+function cardHTML(q) {
+  const is = !!done[q.id];
+  return `<div class="qc${is?' done':''}" id="card-${q.id}">
+    <div class="${q.ok?'stripe-ok':'stripe-pt'}"></div>
+    <div class="ctop">
+      <span class="yr">${q.y}</span>
+      <span class="qn">שאלה ${q.q}</span>
+      <div class="ddot" style="background:${DC[q.d]}"></div>
+      <div class="cacts">
+        <a class="olink" href="${examUrl(q.y)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📄 שאלון</a>
+        <div class="ckbox${is?' on':''}" onclick="toggleDone('${q.id}',event)">
+          <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+            <polyline points="1,3.5 3.5,6 8,1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="topic" onclick="toggleDone('${q.id}',event)">${q.t}</div>
+    ${q.n ? `<div class="note">${q.n}</div>` : ''}
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════════════════════
+function updateStats() {
+  const dn = Object.keys(done).filter(k=>done[k]).length;
+  document.getElementById('s0').textContent  = dn;
+  document.getElementById('s0b').textContent = 'מתוך ' + TOTAL;
+  document.getElementById('prog-fill').style.width = Math.round(100*dn/TOTAL) + '%';
+  document.getElementById('prog-lbl').textContent  = dn + ' מתוך ' + TOTAL + ' הושלמו';
+
+  ['kin','dyn','mom','ene','grav'].forEach((s,i) => {
+    const sq = QS.filter(q => q.s === s);
+    const d2 = sq.filter(q => done[q.id]).length;
+    document.getElementById('s'+(i+1)).textContent    = Math.round(100*d2/sq.length) + '%';
+    document.getElementById('s'+(i+1)+'b').textContent = d2 + '/' + sq.length;
+  });
+  renderRecs();
+}
+
+// ══════════════════════════════════════════════════════
+//  RECOMMENDATIONS
+// ══════════════════════════════════════════════════════
+function toggleRec() {
+  recOpen = !recOpen;
+  document.getElementById('rec-body').style.display = recOpen ? '' : 'none';
+  document.getElementById('rec-lbl').textContent = recOpen ? 'הסתר ▲' : 'הצג ▼';
+}
+
+function renderRecs() {
+  const el = document.getElementById('rec-body');
+  el.innerHTML = RECS.map(r => {
+    const allDone  = r.ids.every(id => done[id]);
+    const doneN    = r.ids.filter(id => done[id]).length;
+    const links    = r.ids.slice(0,3).map(id => {
+      const q = QS.find(q => q.id === id); if (!q) return '';
+      return `<a href="${examUrl(q.y)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${q.y} ש"${q.q}</a>`;
+    }).filter(Boolean).join(' · ');
+    return `<div class="rc${allDone?' rdone':''}" onclick="jumpRec('${r.ids[0]}')">
+      <div class="rpri">
+        <span class="rnk ${r.cls}">#${r.rank}</span>
+        <div class="rpb"><div class="rpf" style="width:${r.prob}%;background:${r.color}"></div></div>
+        <span class="rpv" style="color:${r.color}">${r.prob}%</span>
+      </div>
+      <div class="rt">${r.topic} ${allDone?'✓':doneN>0?`(${doneN}/${r.ids.length})`:''}
+      </div>
+      <div class="rw">${r.why}</div>
+      ${links?`<div class="ri">דוגמאות: ${links}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function jumpRec(firstId) {
+  const q = QS.find(q => q.id === firstId); if (!q) return;
+  const btn = document.querySelector(`button[onclick="setF('${q.s}',this)"]`);
+  if (btn) setF(q.s, btn);
+  setTimeout(() => {
+    const el = document.getElementById('card-' + firstId);
+    if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+  }, 150);
+}
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+document.getElementById('name-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startStudent();
+});
+</script>
+</body>
+</html>
